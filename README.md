@@ -1,3 +1,7 @@
+# 基于ESP32-Pico-D4的电子墨水屏设计
+
+- [x] 硬件打样
+- [ ] 软件开发
 - [ ] 3D打印外壳
 - [ ] 低功耗设计
 - [ ] 进一步优化
@@ -11,21 +15,21 @@
 
 ### 原理图
 
-! [原理图] (../hardware/schematic.png)
+![原理图](./hardware/schematic.png)
 
 ### PCB
 
-! [顶层] (./hardware/top.png)
+采用4层板设计，内层分别为GND层和VCC、3.3V电源平面层。
 
-! [内层] (./hardware/inner.png)
+![顶层](./hardware/top.png)
 
-! [底层] (./hardware/bottom.png)
+![底层](./hardware/bottom.png)
 
 ### 3D视图
 
-! [正面] (./hardware/3d-front.png)
+![正面](./hardware/3d-front.png)
 
-! [背面] (./hardware/3d-back.png)
+![背面](./hardware/3d-back.png)
 
 ### BOM
 
@@ -36,4 +40,3 @@
 ## 外壳设计
 
 ## 低功耗设计
-
