@@ -1,2 +1,3 @@
 idf_component_register(SRCS "e-paper.c"
-                    INCLUDE_DIRS ".")
+                            "system_init.c"
+  INCLUDE_DIRS ".")
