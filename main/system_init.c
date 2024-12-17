@@ -1,65 +1,79 @@
 #include "system_init.h"
-#include "driver/ledc.h"
+#include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "led_indicator.h"
+#include "led_behavior.h"
+
+static const char *TAG_LED = "RGB LED";
+
+enum {
+  LED_INIT = 0,
+  LED_INIT_DONE,
+  LED_BLINK_MAX,
+};
+
+blink_step_t const *led_blink_mode[] = {
+  [LED_INIT] = ledc_red_blink_fast,
+  [LED_INIT_DONE] = ledc_green_breathe,
+  [LED_BLINK_MAX] = NULL,
+};
 
 esp_err_t system_init(void)
 {
-  ESP_ERROR_CHECK(ledc_init());
+  /* 初始化LED */
+  led_indicator_handle_t led_indicator_handle = ledc_init();
+  if(NULL == led_indicator_handle) {
+    ESP_LOGW(TAG_LED, "handle get NULL");
+  } else {
+    ESP_LOGI(TAG_LED, "handle get succeed");
+  }
+  /* 初始化中红灯100毫秒间隔快闪 */
+  ESP_ERROR_CHECK(led_indicator_start(led_indicator_handle, LED_INIT));
+
+  /* 初始化按键 */
+  ESP_ERROR_CHECK(button_init());
+
+  /* 初始化结束绿灯呼吸2秒 */
+  ESP_ERROR_CHECK(led_indicator_stop(led_indicator_handle, LED_INIT));
+  ESP_ERROR_CHECK(led_indicator_start(led_indicator_handle, LED_INIT_DONE));
 
   return ESP_OK;
 }
 
-esp_err_t ledc_init(void)
+led_indicator_handle_t ledc_init(void)
 {
-  // Parameters of ledc_timer_config function
-  ledc_timer_config_t ledc_timer = {
-    .speed_mode = LEDC_LOW_SPEED_MODE,
-    .duty_resolution = LEDC_TIMER_10_BIT,
+  led_indicator_rgb_config_t rgb_config = {
+    .is_active_level_high = false,
+    .timer_inited = false,
     .timer_num = LEDC_TIMER_0,
-    .freq_hz = LEDC_FREQUENCY_1024,
-    .clk_cfg = LEDC_USE_APB_CLK,
-    .deconfigure = false,
+    .red_gpio_num = LEDC_LEDR,
+    .green_gpio_num = LEDC_LEDG,
+    .blue_gpio_num = LEDC_LEDB,
+    .red_channel = LEDC_CHANNEL_0,
+    .green_channel = LEDC_CHANNEL_1,
+    .blue_channel = LEDC_CHANNEL_2,
   };
-  // Apply LEDC PWM timer configuration
-  ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
-
-  // Parameters of ledc_channel_config function
-  ledc_channel_config_t ledc_channel[LEDC_CHANNELS_3] = {
-    {
-      .gpio_num = LEDC_LEDR,
-      .speed_mode = ledc_timer.speed_mode,
-      .channel = LEDC_CHANNEL_0,
-      .intr_type = LEDC_INTR_DISABLE,
-      .timer_sel = ledc_timer.timer_num,
-      .duty = 0,
-      .hpoint = 0,
-      .flags.output_invert = 1,
-    },
-    {
-      .gpio_num = LEDC_LEDG,
-      .speed_mode = ledc_timer.speed_mode,
-      .channel = LEDC_CHANNEL_1,
-      .intr_type = LEDC_INTR_DISABLE,
-      .timer_sel = ledc_timer.timer_num,
-      .duty = 0,
-      .hpoint = 0,
-      .flags.output_invert = 1,
-    },
-    {
-      .gpio_num = LEDC_LEDB,
-      .speed_mode = ledc_timer.speed_mode,
-      .channel = LEDC_CHANNEL_2,
-      .intr_type = LEDC_INTR_DISABLE,
-      .timer_sel = ledc_timer.timer_num,
-      .duty = 0,
-      .hpoint = 0,
-      .flags.output_invert = 1,
-    },
+  led_indicator_config_t led_config = {
+    .mode = LED_RGB_MODE,
+    .led_indicator_rgb_config = &rgb_config,
+    .blink_lists = led_blink_mode,
+    .blink_list_num = LED_BLINK_MAX,
   };
-  // Apply LEDC channel
-  for (uint8_t channels = 0; channels < LEDC_CHANNELS_3; channels++) {
-    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel[channels]));
+  led_indicator_handle_t led_handle = led_indicator_create(&led_config);
+  if(NULL == led_handle) {
+    ESP_LOGW(TAG_LED, "create failed");
+    return NULL;
+  } else {
+    ESP_LOGI(TAG_LED, "create succeed");
   }
 
+  return led_handle;
+}
+
+esp_err_t button_init(void)
+{
+  vTaskDelay(5000 / portTICK_PERIOD_MS);
   return ESP_OK;
 }
 

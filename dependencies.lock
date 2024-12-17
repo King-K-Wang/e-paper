@@ -1,0 +1,49 @@
+dependencies:
+  espressif/cmake_utilities:
+    component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.1'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 0.5.3
+  espressif/led_indicator:
+    component_hash: f1fbe20fba9313986c32b1b6b7a4ae4822103ab928b51e9bd77215470cb70d98
+    dependencies:
+    - name: espressif/led_strip
+      registry_url: https://components.espressif.com
+      require: public
+      version: 2.5.5
+    - name: idf
+      require: private
+      version: '>=4.0'
+    - name: espressif/cmake_utilities
+      registry_url: https://components.espressif.com
+      require: private
+      version: 0.*
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.0
+  espressif/led_strip:
+    component_hash: 28c6509a727ef74925b372ed404772aeedf11cce10b78c3f69b3c66799095e2d
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.4'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 2.5.5
+  idf:
+    source:
+      type: idf
+    version: 5.2.0
+direct_dependencies:
+- espressif/led_indicator
+- idf
+manifest_hash: f684cca04e6d04665c09f1a75b1b07c9c243ddae91a7752a8d9af0732279e170
+target: esp32
+version: 2.0.0
